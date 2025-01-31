@@ -103,5 +103,5 @@ if __name__ == "__main__":
 
     algo = dump.load("model/mini_model.pkl")[1]
 
-    recs = run_model("dima", algo, user_watched_list, threshold_movie_list, 25)
+    recs = run_model("wiped_issues", algo, user_watched_list, threshold_movie_list, 25)
     print(recs)
