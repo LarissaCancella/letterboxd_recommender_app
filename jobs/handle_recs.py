@@ -68,13 +68,18 @@ def get_client_user_data(username, data_opt_in):
     Returns:
         list: List of user's movie ratings.
     """
-    user_data = get_user_data(username, data_opt_in)
-    current_job = get_current_job(conn)
-    if current_job:
-        current_job.meta['user_status'] = user_data[1]
-        current_job.meta['num_user_ratings'] = len(user_data[0])
-        current_job.save()
-    return user_data[0]
+    logger.info(f"Iniciando get_client_user_data para {username}")
+    try:
+        user_data = get_user_data(username, data_opt_in)
+        current_job = get_current_job(conn)
+        if current_job:
+            current_job.meta['user_status'] = user_data[1]
+            current_job.meta['num_user_ratings'] = len(user_data[0])
+            current_job.save()
+        return user_data[0]
+    except Exception as e:
+        logger.error(f"Erro em get_client_user_data para {username}: {str(e)}")
+        raise
 
 
 def build_client_model(username, training_data_rows=200000, popularity_threshold=None, num_items=30):
@@ -91,44 +96,50 @@ def build_client_model(username, training_data_rows=200000, popularity_threshold
         list: List of movie recommendations.
     """
     # Load user data from previous Redis job
-    current_job = get_current_job(conn)
-    user_data = current_job.dependency.result if current_job and current_job.dependency else []
-
-    if current_job:
-        current_job.meta['stage'] = 'creating_sample_data'
-        current_job.save()
-
-    # Load training data and sample it
+    logger.info(f"Iniciando build_client_model para {username}")
     try:
-        df = pd.read_csv('data/ratings.csv')
-    except FileNotFoundError:
-        print("Training data file not found.")
-        return []
-    
-    model_df = df.head(training_data_rows)
+        current_job = get_current_job(conn)
+        user_data = current_job.dependency.result if current_job and current_job.dependency else []
 
-    # Load threshold movie list
-    try:
-        with open("model/threshold_movie_list.txt", "rb") as fp:
-            threshold_movie_list = pickle.load(fp)
-    except FileNotFoundError:
-        print("Threshold movie list file not found.")
-        return []
+        if current_job:
+            current_job.meta['stage'] = 'creating_sample_data'
+            current_job.save()
 
-    # Apply popularity filter if specified
-    if popularity_threshold:
-        threshold_movie_list = filter_threshold_list(threshold_movie_list, popularity_threshold)
-    
-    # Build and run the model
-    if current_job:
-        current_job.meta['stage'] = 'building_model'
-        current_job.save()
-    
-    algo, user_watched_list = build_model(model_df, user_data)
-    
-    if current_job:
-        current_job.meta['stage'] = 'running_model'
-        current_job.save()
-    
-    recs = run_model(username, algo, user_watched_list, threshold_movie_list, num_items)
-    return recs
+        # Load training data and sample it
+        try:
+            df = pd.read_csv('data/ratings.csv')
+        except FileNotFoundError:
+            print("Training data file not found.")
+            return []
+        
+        model_df = df.head(training_data_rows)
+
+        # Load threshold movie list
+        try:
+            with open("model/threshold_movie_list.txt", "rb") as fp:
+                threshold_movie_list = pickle.load(fp)
+        except FileNotFoundError:
+            print("Threshold movie list file not found.")
+            return []
+
+        # Apply popularity filter if specified
+        if popularity_threshold:
+            threshold_movie_list = filter_threshold_list(threshold_movie_list, popularity_threshold)
+        
+        # Build and run the model
+        if current_job:
+            current_job.meta['stage'] = 'building_model'
+            current_job.save()
+        
+        algo, user_watched_list = build_model(model_df, user_data)
+        
+        if current_job:
+            current_job.meta['stage'] = 'running_model'
+            current_job.save()
+        
+        recs = run_model(username, algo, user_watched_list, threshold_movie_list, num_items)
+        logger.info(f"Finalizando build_client_model para {username}")
+        return recs
+    except Exception as e:
+        logger.error(f"Erro em build_client_model para {username}: {str(e)}")
+        raise
