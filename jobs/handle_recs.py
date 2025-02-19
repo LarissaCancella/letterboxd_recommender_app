@@ -1,5 +1,10 @@
 import sys
 import os
+import logging
+
+# Configuração do logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Adiciona o diretório raiz do projeto ao Python Path
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

@@ -31,7 +31,7 @@ rodando os scripts para popular o banco:
 3- pipenv run python scraping/get_ratings.py
 4- pipenv run python scraping/get_movies.py 
 
-acho q sera preciso exportar as tabelas do banco como csv e adicionar os arquivos na pasta data
+acho q sera preciso exportar a tabela ratings do banco como csv e adiciona-la na pasta data
 
 rodando os scripts para treinamento:
 
@@ -52,3 +52,13 @@ campos da url:
     - max: 7
 - num_items:
     - default: 30
+
+
+apos subir a api, esses sao os endpoints e suas respectivas URLs a serem executadas para receber as recomendações para o usuario desejado:
+
+- GET RECS (modificar os query params)
+    http://127.0.0.1:8000/get_recs?username=wiped_issues&training_data_size=200000&popularity_filter=1&data_opt_in=true
+
+- GET RESULTS (o redis armazena os resultados por 30 segundos, os query params sao os ids retornados na response do get_recs)
+    http://127.0.0.1:8000/results?redis_build_model_job_id=d4f828bc-41eb-4ca8-86d9-f177b7ed7f0e&redis_get_user_data_job_id=c50a6893-e256-4c7f-86b3-26d9d5dfc118
+    
