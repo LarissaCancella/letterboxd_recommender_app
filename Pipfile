@@ -22,11 +22,11 @@ flask = "*"
 flask-cors = "*"
 flask-talisman = "*"
 gunicorn = "*"
-rq = "*"
-redis = "*"
 fastapi = "*"
 uvicorn = {extras = ["standard"], version = "*"}
 scikit-surprise = "*"
+rq = "*"
+redis = "*"
 
 [dev-packages]
 
