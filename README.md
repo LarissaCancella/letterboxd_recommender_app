@@ -1,9 +1,7 @@
-comandos:
-
 - verificar a versao do python:
 python -- version 
 
-conferir se é 3.11.0
+conferir se é 3.11.0, se nao, instalar.
 
 - instalar pipenv
 pip install pipenv
@@ -62,3 +60,10 @@ apos subir a api, esses sao os endpoints e suas respectivas URLs a serem executa
 - GET RESULTS (o redis armazena os resultados por 30 segundos, os query params sao os ids retornados na response do get_recs)
     http://127.0.0.1:8000/results?redis_build_model_job_id=d4f828bc-41eb-4ca8-86d9-f177b7ed7f0e&redis_get_user_data_job_id=c50a6893-e256-4c7f-86b3-26d9d5dfc118
     
+
+FRONTEND:
+- acessar o diretorio /frontend e rodar o comando "npm install"
+- para subir o frontend rodar os seguintes comandos:
+    - npx next build
+    - npx next start
+- a porta usada é a 3000. ou seja, http://localhost:3000
