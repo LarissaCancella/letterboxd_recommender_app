@@ -1,8 +1,7 @@
 from fastapi import FastAPI, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 from typing import Union
 from urllib.parse import urlparse, urlunparse
 import pandas as pd
@@ -47,6 +46,12 @@ popularity_thresholds_500k_samples = [2500, 2000, 1500, 1000, 700, 400, 250, 150
 #def homepage():
     # Redirecionar para URL principal
     #return RedirectResponse(REDIRECT_URL)
+
+class RecommendationRequest(BaseModel):
+    username: str
+    training_data_size: int
+    popularity_filter: int
+    data_opt_in: bool
 
 
 @app.get("/get_recs")
