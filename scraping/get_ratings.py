@@ -28,7 +28,6 @@ async def fetch(url, session, input_data={}):
             print(f"Error fetching {url}: {e}")
             return None, None
 
-
 async def get_page_counts(usernames, users_cursor):
     url = "https://letterboxd.com/{}/films/"
     tasks = []
@@ -77,7 +76,6 @@ async def get_page_counts(usernames, users_cursor):
             except BulkWriteError as bwe:
                 pprint(bwe.details)
 
-
 async def generate_ratings_operations(response, send_to_db=True, return_unrated=False):
     soup = BeautifulSoup(response[0], "lxml")
     reviews = soup.findAll("li", class_="poster-container")
@@ -122,7 +120,6 @@ async def generate_ratings_operations(response, send_to_db=True, return_unrated=
 
     return ratings_operations, movie_operations
 
-
 async def get_user_ratings(username, db_cursor=None, mongo_db=None, store_in_db=True, num_pages=None, return_unrated=False):
     url = "https://letterboxd.com/{}/films/by/date/page/{}/"
 
@@ -143,7 +140,6 @@ async def get_user_ratings(username, db_cursor=None, mongo_db=None, store_in_db=
 
     upsert_ratings_operations, upsert_movies_operations = zip(*parse_responses)
     return list(chain.from_iterable(upsert_ratings_operations)), list(chain.from_iterable(upsert_movies_operations))
-
 
 async def get_ratings(usernames, db_cursor=None, mongo_db=None, store_in_db=True):
     ratings_collection = mongo_db.ratings
@@ -188,7 +184,6 @@ async def get_ratings(usernames, db_cursor=None, mongo_db=None, store_in_db=True
             except BulkWriteError as bwe:
                 pprint(bwe.details)
 
-
 def print_status(start, chunk_size, chunk_index, total_operations, total_records):
     total_time = round((time.time() - start), 2)
     completed_records = chunk_size * chunk_index
@@ -205,8 +200,7 @@ def print_status(start, chunk_size, chunk_index, total_operations, total_records
     print("Est. Time Remaining:", helpers.format_seconds(remaining_estimate))
     print("================\n")
 
-
-def main():
+async def main_async():
     db_name, client, tmdb_key = connect_to_db()
     db = client[db_name]
     users = db.users
@@ -222,14 +216,11 @@ def main():
         pbar.set_description(f"Scraping ratings data for user group {chunk+1} of {num_chunks}")
         username_set = all_usernames[chunk * large_chunk_size: (chunk + 1) * large_chunk_size]
 
-        loop = asyncio.get_event_loop()
+        await get_page_counts(username_set, users)
+        await get_ratings(username_set, users, db)
 
-        future = asyncio.ensure_future(get_page_counts(username_set, users))
-        loop.run_until_complete(future)
-
-        future = asyncio.ensure_future(get_ratings(username_set, users, db))
-        loop.run_until_complete(future)
-
+def main():
+    asyncio.run(main_async())
 
 if __name__ == "__main__":
     main()

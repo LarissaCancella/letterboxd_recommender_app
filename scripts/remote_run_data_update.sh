@@ -2,7 +2,7 @@
 git pull origin main
 
 # Run DB updates
-pipenv run python get_user_ratings.py
+pipenv run python get_popular_user.py
 pipenv run python get_ratings.py
 pipenv run python get_movies.py
 

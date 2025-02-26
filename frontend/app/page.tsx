@@ -126,9 +126,9 @@ export default function Home() {
                   <Slider
                     value={[performanceRatio]}
                     onValueChange={(value) => setPerformanceRatio(value[0])}
-                    step={100000}
-                    min={400000}
-                    max={900000}
+                    step={200000}
+                    min={100000}
+                    max={800000}
                     className="[&_[role=slider]]:bg-primary"
                   />
                   <div className="flex justify-between text-xs text-zinc-400">

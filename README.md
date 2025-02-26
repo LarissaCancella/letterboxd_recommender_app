@@ -1,69 +1,104 @@
-- verificar a versao do python:
-python -- version 
+# LETTERBOXD RECOMMENDER APP
 
-conferir se é 3.11.0, se nao, instalar.
+## Configuração do Ambiente
 
-- instalar pipenv
-pip install pipenv
+1. Verifique a versão do Python:
+   ```
+   python --version
+   ```
+   Certifique-se de que é 3.11.0. Se não for, instale-a.
 
-- instalar as dependencias no ambiente virtual
-pipenv install
+2. Crie um ambiente virtual:
+   ```
+   python -m venv venv
+   ```
 
-caso de erro:
-error: Microsoft Visual C++ 14.0 or greater is required. Get it with "Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/
+3. Ative o ambiente virtual:
+   - No Windows:
+     ```
+     venv\Scripts\activate
+     ```
+   - No macOS e Linux:
+     ```
+     source venv/bin/activate
+     ```
 
-- entrar no ambiente virtual
-pipenv shell
+4. Instale as dependências:
+   ```
+   pip install -r requirements.txt
+   ```
 
-- subir o redis
-pipenv run python worker.py
+   Caso ocorra erro:
+   Se você receber um erro sobre "Microsoft Visual C++ 14.0 or greater is required", instale o "Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/
 
-- subir api
-uvicorn main:app --reload
+## Executando o Projeto
 
+1. Inicie o Redis:
+   ```
+   python worker.py
+   ```
 
-rodando os scripts para popular o banco:
+2. Inicie a API:
+   ```
+   uvicorn main:app --reload
+   ```
 
-1- pipenv run python scraping/get_popular_user.py
-2- pipenv run python scraping/get_user_ratings.py
-3- pipenv run python scraping/get_ratings.py
-4- pipenv run python scraping/get_movies.py 
+## Populando o Banco de Dados
 
-acho q sera preciso exportar a tabela ratings do banco como csv e adiciona-la na pasta data
+Execute os seguintes scripts nesta ordem:
 
-rodando os scripts para treinamento:
+1. `python scraping/get_popular_user.py`
+2. `python scraping/get_ratings.py`
+3. `python scraping/get_movies.py`
 
-1- pipenv run python model/create_training_data.py
-2- pipenv run python model/build_model.py
-3- pipenv run python model/run_model.py
+Nota: Pode ser necessário exportar a tabela de ratings do banco como CSV e adicioná-la à pasta 'data'.
 
+## Treinamento do Modelo
 
-campos da url:
-- username (Username for whom the model is being built)
-- training_data_size (Number of rows for the training dataset sample): 
-    - default: 200000
-    - min: 100000
-    - max: 800000
-- popularity_threshold (Threshold for filtering popular movies (optional)):
-    - default: none
-    - min: -1
-    - max: 7
+Execute os seguintes scripts nesta ordem:
+
+1. `python model/create_training_data.py`
+2. `python model/build_model.py`
+3. `python model/run_model.py`
+
+## Parâmetros da URL
+
+- username: Nome de usuário para quem o modelo está sendo construído
+- training_data_size: Número de linhas para a amostra do conjunto de dados de treinamento
+  - default: 200000
+  - min: 100000
+  - max: 800000
+- popularity_threshold: Limite para filtrar filmes populares (opcional)
+  - default: none
+  - min: -1
+  - max: 7
 - num_items:
-    - default: 30
+  - default: 30
 
+## Endpoints da API
 
-apos subir a api, esses sao os endpoints e suas respectivas URLs a serem executadas para receber as recomendações para o usuario desejado:
+Após iniciar a API, use os seguintes endpoints para obter recomendações:
 
-- GET RECS (modificar os query params)
-    http://127.0.0.1:8000/get_recs?username=wiped_issues&training_data_size=200000&popularity_filter=1&data_opt_in=true
+1. GET RECS (modifique os parâmetros de consulta conforme necessário):
+   ```
+   http://127.0.0.1:8000/get_recs?username={username}&training_data_size={size}&popularity_filter={filter}&data_opt_in={bool}
+   ```
 
-- GET RESULTS (o redis armazena os resultados por 30 segundos, os query params sao os ids retornados na response do get_recs)
-    http://127.0.0.1:8000/results?redis_build_model_job_id=d4f828bc-41eb-4ca8-86d9-f177b7ed7f0e&redis_get_user_data_job_id=c50a6893-e256-4c7f-86b3-26d9d5dfc118
-    
+2. GET RESULTS (o Redis armazena os resultados por 30 segundos, use os IDs retornados na resposta do get_recs):
+   ```
+   http://127.0.0.1:8000/results?redis_build_model_job_id={model}&redis_get_user_data_job_id={user}
+   ```
 
-FRONTEND:
-- acessar o diretorio /frontend e rodar o comando "npm install"
-- para subir o frontend rodar os seguintes comandos:
-    - npx next build
-    - npx next start
-- a porta usada é a 3000. ou seja, http://localhost:3000
+## Frontend
+
+1. Acesse o diretório `/frontend`
+2. Instale as dependências:
+   ```
+   npm install
+   ```
+3. Para iniciar o frontend, execute:
+   ```
+   npx next build
+   npx next start
+   ```
+4. O frontend estará disponível em `http://localhost:3000`

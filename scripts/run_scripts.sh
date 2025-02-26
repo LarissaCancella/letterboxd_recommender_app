@@ -4,11 +4,6 @@ pipenv run python ./scraping/get_popular_user.py
 echo "Finished scraping popular users from site"
 echo
 
-echo "Scraping user ratings from site and adding to database"
-pipenv run python ./scraping/get_user_ratings.py
-echo "Finished scraping user ratings from site"
-echo
-
 echo "Scraping ratings from site. Even running asynchronously, this can take several hours."
 pipenv run python ./scraping/get_ratings.py
 echo "Finished scraping ratings from site"

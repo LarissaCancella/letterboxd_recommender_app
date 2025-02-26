@@ -55,14 +55,11 @@ def run_model(username, algo, user_watched_list, threshold_movie_list, num_recom
     if config and config["CONNECTION_URL"]:
         connection_url = config["CONNECTION_URL"]
     else:
-        connection_url = (f'mongodb+srv://{config["MONGO_USERNAME"]}:{config["MONGO_PASSWORD"]}'
-                           f'@letterboxd.{config["MONGO_CLUSTER_ID"]}.mongodb.net/{db_name}?retryWrites=true&w=majority')
-    
-    #print(connection_url)
+        connection_url = os.environ.get('CONNECTION_URL', '')
+
     try:
         client = pymongo.MongoClient(connection_url, server_api=pymongo.server_api.ServerApi('1'))
         db = client[db_name]
-        #print(db)
     except Exception as e:
         print(f"Error connecting to MongoDB: {e}")
         return []
@@ -75,7 +72,6 @@ def run_model(username, algo, user_watched_list, threshold_movie_list, num_recom
 
     movie_fields = ["image_url", "movie_id", "movie_title", "year_released", "genres", "original_language", "popularity", "runtime", "release_date"]
     movie_data = {x["movie_id"]: {k: v for k, v in x.items() if k in movie_fields} for x in db.movies.movies.find({"movie_id": {"$in": [x[0] for x in top_n]}})}
-    #print(movie_data)
 
     return_object = [{
         "movie_id": x[0],
@@ -95,11 +91,9 @@ def run_model(username, algo, user_watched_list, threshold_movie_list, num_recom
 if __name__ == "__main__":
     with open("model/user_watched.txt", "rb") as fp:
         user_watched_list = pickle.load(fp)
-    #print(user_watched_list)
 
     with open("model/threshold_movie_list.txt", "rb") as fp:
         threshold_movie_list = pickle.load(fp)
-    #print(threshold_movie_list)
 
     algo = dump.load("model/mini_model.pkl")[1]
 
